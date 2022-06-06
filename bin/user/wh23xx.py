@@ -424,7 +424,7 @@ class WH23xxDriver(weewx.drivers.AbstractDevice):
                         packet = self._data_to_packet(decoded)
                         logdbg("packet: %s" % packet)
                         yield packet
-                except IndexError, e:
+                except (IndexError, e):
                     logerr("decode failed: %s (%s)" % (e, _fmt(raw)))
                     log_traceback(loglevel=syslog.LOG_DEBUG)
             time.sleep(self._poll_interval)
