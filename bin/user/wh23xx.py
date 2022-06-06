@@ -608,7 +608,7 @@ class WH23xxStation(object):
             try:
                 self.devh.reset()
                 break
-            except usb.USBError, e:
+            except (usb.USBError, e):
                 logdbg("usb reset failed: %s" % e)
                 time.sleep(2)
 
@@ -1051,7 +1051,7 @@ if __name__ == '__main__':
                         raw = s._read_eeprom(i, 0x20)
                         print "%04x" % i, _fmt(raw[:size])
                         break
-                    except Exception, e:
+                    except (Exception, e):
                         print "failed read %d of 3 for 0x%04x: %s" % (n+1, i, e)
                         print "waiting 3 seconds before retry"
                         time.sleep(3)
