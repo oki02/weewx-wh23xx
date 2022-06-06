@@ -371,7 +371,7 @@ def get_usb_info():
     pyusb_version = '0.4.x'
     try:
         pyusb_version = usb.__version__
-    except AttributeError:
+    except (AttributeError):
         pass
     return "pyusb_version=%s" % pyusb_version
 
@@ -435,14 +435,14 @@ class WH23xxDriver(weewx.drivers.AbstractDevice):
             ntries += 1
             try:
                 return self._station.get_current()
-            except usb.USBError, e:
+            except (usb.USBError, e):
                 if known_usb_err(e):
                     logdbg("get_current: %s" % e)
                     ntries -= 1
                 else:
                     logerr("get_current: failed attempt %d of %d: %s" %
                            (ntries, self.max_tries, e))
-            except weewx.WeeWxIOError, e:
+            except (weewx.WeeWxIOError, e):
                 logerr("get_current: failed attempt %d of %d: %s" %
                        (ntries, self.max_tries, e))
             time.sleep(self.retry_wait)
