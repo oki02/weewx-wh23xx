@@ -594,7 +594,7 @@ class WH23xxStation(object):
         if self.devh:
             try:
                 self.devh.releaseInterface()
-            except (ValueError, usb.USBError), e:
+            except (ValueError, usb.USBError, e):
                 logerr("release interface failed: %s" % e)
             self.devh = None
 
