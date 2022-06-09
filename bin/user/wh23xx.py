@@ -246,7 +246,6 @@ Command Result
     9 RT_INVALID_PARAM
 """
 
-from __future__ import with_statement
 import syslog
 import time
 import usb
@@ -257,7 +256,7 @@ from weeutil.log import log_traceback
 from weewx.wxformulas import calculate_rain
 
 DRIVER_NAME = 'WH23xx'
-DRIVER_VERSION = '0.14'
+DRIVER_VERSION = '0.15'
 
 
 def loader(config_dict, _):
@@ -438,7 +437,7 @@ class WH23xxDriver(weewx.drivers.AbstractDevice):
                         packet = self._data_to_packet(decoded)
                         logdbg("packet: %s" % packet)
                         yield packet
-                except (IndexError, e):
+                except IndexError as e:
                     logerr("decode failed: %s (%s)" % (e, _fmt(raw)))
                     log_traceback(loglevel=syslog.LOG_DEBUG)
             time.sleep(self._poll_interval)
@@ -449,14 +448,14 @@ class WH23xxDriver(weewx.drivers.AbstractDevice):
             ntries += 1
             try:
                 return self._station.get_current()
-            except (usb.USBError, e):
+            except usb.USBError as e:
                 if known_usb_err(e):
                     logdbg("get_current: %s" % e)
                     ntries -= 1
                 else:
                     logerr("get_current: failed attempt %d of %d: %s" %
                            (ntries, self.max_tries, e))
-            except (weewx.WeeWxIOError, e):
+            except weewx.WeeWxIOError as e:
                 logerr("get_current: failed attempt %d of %d: %s" %
                        (ntries, self.max_tries, e))
             time.sleep(self.retry_wait)
@@ -601,7 +600,7 @@ class WH23xxStation(object):
         try:
             self.devh.claimInterface(self.iface)
             self.devh.setAltInterface(self.iface)
-        except (usb.USBError, e):
+        except usb.USBError as e:
             logerr("Unable to claim USB interface %s: %s" % (self.iface, e))
             self.close()
             raise weewx.WeeWxIOError(e)
@@ -610,7 +609,7 @@ class WH23xxStation(object):
         if self.devh:
             try:
                 self.devh.releaseInterface()
-            except (ValueError, usb.USBError, e):
+            except (ValueError, usb.USBError) as e:
                 logerr("release interface failed: %s" % e)
             self.devh = None
 
@@ -624,7 +623,7 @@ class WH23xxStation(object):
             try:
                 self.devh.reset()
                 break
-            except (usb.USBError, e):
+            except usb.USBError as e:
                 logdbg("usb reset failed: %s" % e)
                 time.sleep(2)
 
@@ -995,10 +994,10 @@ if __name__ == '__main__':
                        'mode', 'model', 'timezone', 'version']
 
     def print_info(x, display_keys=None):
-        keys = x.keys() if not display_keys else list(set(x.keys()) & set(display_keys))
+        keys = list(x.keys()) if not display_keys else list(set(x.keys()) & set(display_keys))
         keys.sort()
         for k in keys:
-            print("%s: %s" % (k, x[k]))
+            print(("%s: %s" % (k, x[k])))
 
     import optparse
 
@@ -1016,7 +1015,7 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
 
     if options.version:
-        print("driver version %s" % DRIVER_VERSION)
+        print(("driver version %s" % DRIVER_VERSION))
         exit(1)
 
     if options.debug:
@@ -1033,8 +1032,8 @@ if __name__ == '__main__':
             while True:
                 raw = s.get_current()
                 if options.debug:
-                    print(_fmt(raw))
-                print(WH23xxStation.decode_weather_data(raw))
+                    print((_fmt(raw)))
+                print((WH23xxStation.decode_weather_data(raw)))
                 time.sleep(5)
     elif options.action == 'sync-time':
         with WH23xxStation() as s:
@@ -1045,25 +1044,25 @@ if __name__ == '__main__':
     elif options.action == 'test-decode-info':
         for row in INFO_DATA:
             raw = [int(x, 16) for x in row.split()]
-            print(_fmt(raw))
-            print(WH23xxStation.decode_station_info(raw))
+            print((_fmt(raw)))
+            print((WH23xxStation.decode_station_info(raw)))
     elif options.action == 'test-decode-current':
         for row in CURRENT_DATA:
             raw = [int(x, 16) for x in row.split()]
-            print(_fmt(raw))
-            print(WH23xxStation.decode_weather_data(raw))
+            print((_fmt(raw)))
+            print((WH23xxStation.decode_weather_data(raw)))
     elif options.action == 'test-decode-history':
         for row in HISTORY_DATA:
             raw = [int(x, 16) for x in row.split()]
-            print(_fmt(raw))
-            print(WH23xxStation.decode_history_record(raw))
+            print((_fmt(raw)))
+            print((WH23xxStation.decode_history_record(raw)))
     elif options.action == 'eeprom-time':
         with WH23xxStation() as s:
             raw = s._read_eeprom(0x02c8, 8)
-            print(_fmt(raw[0:8]))
-            print("%04d.%02d.%02d %02d:%02d %ss" % (
+            print((_fmt(raw[0:8])))
+            print(("%04d.%02d.%02d %02d:%02d %ss" % (
                 2000 + raw[0], raw[1], raw[2], raw[3], raw[4],
-                raw[5] + raw[6] * 256))
+                raw[5] + raw[6] * 256)))
     elif options.action == 'dump':
         with WH23xxStation() as s:
             size = 0x20
@@ -1071,11 +1070,11 @@ if __name__ == '__main__':
                 for n in range(0, 3):
                     try:
                         raw = s._read_eeprom(i, 0x20)
-                        print("%04x" % i, _fmt(raw[:size]))
+                        print(("%04x" % i, _fmt(raw[:size])))
                         break
-                    except (Exception, e):
-                        print("failed read %d of 3 for 0x%04x: %s" %
-                              (n+1, i, e))
+                    except Exception as e:
+                        print(("failed read %d of 3 for 0x%04x: %s" %
+                              (n+1, i, e)))
                         print("waiting 3 seconds before retry")
                         time.sleep(3)
                 else:
