@@ -26,3 +26,15 @@ sudo wee_config --reconfigure
 4) start weewx
 
 sudo /etc/init.d/weewx start
+
+
+in kurzform:
+1. Type the following in a terminal window:
+sudo gedit /etc/modprobe.d/usb-core-options
+2. Add the following line to the usb-core-options file:
+options usbcore autosuspend=-1
+3. Save your changes, and then type the following in a terminal window:
+sudo update-initramfs -u
+4. Shutdown and power on your computer. (Don't use the restart option)
+
+seitdem funktioniert usb bei mir einwandfrei!!
